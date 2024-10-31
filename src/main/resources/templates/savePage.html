@@ -1,0 +1,157 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" crossorigin="anonymous">
+  <title>ICpEP Student Attendance System</title>
+  <style>
+    .crud-management-buttons-container {
+        margin-bottom: 20px;
+    }
+    .select-event-container {
+        margin-bottom: 20px;
+    }
+    .radio-buttons-container {
+        margin-bottom: 20px;
+    }
+    .table-attendance {
+        margin-top: 20px;
+    }
+    .form-control {
+        margin-bottom: 10px;
+    }
+    .form-check-label {
+        margin-left: 10px;
+    }
+    .select-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px; /* Add spacing between selects */
+    }
+    .select-container .form-group {
+        flex: 1 1 200px; /* Adjust width as needed */
+    }
+    .filter-button {
+        align-self: flex-end; /* Align the button at the bottom */
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1 class="text-center my-4">ICpEP Student Attendance System</h1>
+  <!-- Attendance Table for Specific Day -->
+  <div class="table-attendance" th:if="${isWholeDay != null}">
+    <table class="table table-striped table-bordered">
+      <thead class="thead-dark">
+      <tr th:if="${!isWholeDay}">
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Year Level</th>
+        <th scope="col">Section</th>
+        <th scope="col">Course</th>
+        <th scope="col">Event</th>
+        <th scope="col">Time In</th>
+        <th scope="col">Time Out</th>
+      </tr>
+      <tr th:if="${isWholeDay}">
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Year Level</th>
+        <th scope="col">Section</th>
+        <th scope="col">Course</th>
+        <th scope="col">Event</th>
+        <th scope="col">Time In AM</th>
+        <th scope="col">Time Out AM</th>
+        <th scope="col">Time In PM</th>
+        <th scope="col">Time Out PM</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="attendance : ${attendances}" th:if="${!isWholeDay}">
+        <td th:text="${attendance.attendanceId}"></td>
+        <td th:text="${attendance.student.name}"></td>
+        <td th:text="${attendance.student.yearLevel}"></td>
+        <td th:text="${attendance.student.section}"></td>
+        <td th:text="${attendance.student.course}"></td>
+        <td th:text="${attendance.event.name}"></td>
+        <td th:text="${#temporals.format(attendance.tIn, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tOut, 'h:mm a')}"></td>
+      </tr>
+      <tr th:each="attendance : ${attendances}" th:if="${isWholeDay}">
+        <td th:text="${attendance.attendanceId}"></td>
+        <td th:text="${attendance.student.name}"></td>
+        <td th:text="${attendance.student.yearLevel}"></td>
+        <td th:text="${attendance.student.section}"></td>
+        <td th:text="${attendance.student.course}"></td>
+        <td th:text="${attendance.event.name}"></td>
+        <td th:text="${#temporals.format(attendance.tInAm, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tOutAm, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tInPm, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tOutPm, 'h:mm a')}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Attendance Table when the day is not specified -->
+  <div class="table-attendance" th:if="${isWholeDay == null}">
+    <table class="table table-striped table-bordered">
+      <thead class="thead-dark">
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Year Level</th>
+        <th scope="col">Section</th>
+        <th scope="col">Course</th>
+        <th scope="col">Event</th>
+        <th scope="col">Time In</th>
+        <th scope="col">Time Out</th>
+        <th scope="col">Time In AM</th>
+        <th scope="col">Time Out AM</th>
+        <th scope="col">Time In PM</th>
+        <th scope="col">Time Out PM</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="attendance : ${attendances}">
+        <td th:text="${attendance.attendanceId}"></td>
+        <td th:text="${attendance.student.name}"></td>
+        <td th:text="${attendance.student.yearLevel}"></td>
+        <td th:text="${attendance.student.section}"></td>
+        <td th:text="${attendance.student.course}"></td>
+        <td th:text="${attendance.event.name}"></td>
+        <td th:text="${#temporals.format(attendance.tIn, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tOut, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tInAm, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tOutAm, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tInPm, 'h:mm a')}"></td>
+        <td th:text="${#temporals.format(attendance.tOutPm, 'h:mm a')}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  <h1 class="text-center my-4">ABSENT</h1>
+  <!-- Absent Students Table -->
+  <div class="table-responsive mt-4">
+    <table class="table table-striped table-bordered">
+      <thead class="thead-dark">
+      <tr>
+        <th scope="col">Student ID</th>
+        <th scope="col">Student Name</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="student : ${absentStudents}">
+        <td th:text="${student.studentId}"></td>
+        <td th:text="${student.name}"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

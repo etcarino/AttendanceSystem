@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+  <p>Submitted EventId: <span th:text="${formObject.eventId}"></span></p>
+  <p>Clock State: <span th:text="${formObject.clockState}"></span></p>
+  <p>Time in: <span th:text="${#temporals.format(formObject.tIn, 'h:mm a')}"></span></p>
+  <p>Time out: <span th:text="${#temporals.format(formObject.tOut, 'h:mm a')}"></span></p>
+  <p>Time in am: <span th:text="${#temporals.format(formObject.tInAm, 'h:mm a')}"></span></p>
+  <p>Time out am: <span th:text="${#temporals.format(formObject.tOutAm, 'h:mm a')}"></span></p>
+  <p>Time in pm: <span th:text="${#temporals.format(formObject.tInPm, 'h:mm a')}"></span></p>
+  <p>Time out pm: <span th:text="${#temporals.format(formObject.tOutPm, 'h:mm a')}"></span></p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>ICpEP Student Attendance System</title>
+    <script>
+        let lastKeyTime = 0;
+        let inputSequence = "";
+        let inputTimer;
+
+        function handleInput(event) {
+            const currentTime = new Date().getTime();
+            const timeDifference = currentTime - lastKeyTime;
+            lastKeyTime = currentTime;
+            const inputValue = event.target.value;
+
+            if (timeDifference < 50 && inputValue.length >= 8) {
+                document.getElementById("attendanceForm").submit();
+            } else {
+                clearTimeout(inputTimer);
+                inputTimer = setTimeout(() => {
+                    if (inputValue.length > 0 && event.inputType === 'insertText') {
+                        document.addEventListener('keydown', function(event) {
+                            if (event.key === 'Enter') {
+                                document.getElementById("attendanceForm").submit();
+                            }
+                        });
+                    }
+                }, 100);
+            }
+        }
+    </script>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <h1>ICpEP Attendance System</h1>
+    <div class="ml-auto">
+        <a class="btn btn-primary" href="/..">Admin</a>
+    </div>
+</nav>
+
+<!-- Display error message if present -->
+<center><h1 th:if="${errorMessage != null}" th:text="${errorMessage}"></h1></center>
+<!-- Display success message if present -->
+<center><h1 th:if="${successMessage != null}" th:text="${successMessage}"></h1></center>
+
+<div class="container">
+    <center><h1 th:text="${selectedEvent != null ? selectedEvent.name : 'No event selected'}">No event selected</h1></center>
+    <center><h3 th:text="${selectedEvent != null ? selectedEvent.clockState : ''}"></h3></center>
+    <form id="attendanceForm" th:action="@{/attendance/saveAttendance}" th:object="${attendanceDto}" method="post">
+        <div class="form-group">
+            <label>Student Number:</label>
+            <input type="text" th:field="*{studentId}" class="form-control" placeholder="Enter student ID" oninput="handleInput(event)" autofocus />
+            <input type="hidden" name="eventId" th:value="${selectedEvent != null ? selectedEvent.eventId : ''}" />
+            <input type="hidden" name="clockState" th:value="${selectedEvent != null ? selectedEvent.clockState : ''}"/>
+        </div>
+    </form>
+
+    <div>
+        <table class="table table-striped">
+            <thead class="thead-dark">
+            <tr th:if="${!selectedEvent.wholeDay}">
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Time In</th>
+                <th scope="col">Time Out</th>
+            </tr>
+            <tr th:if="${selectedEvent.wholeDay}">
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Time In AM</th>
+                <th scope="col">Time Out AM</th>
+                <th scope="col">Time In PM</th>
+                <th scope="col">Time Out PM</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="attendee : ${attendanceGet}" th:if="${!selectedEvent.wholeDay} and ${attendee.event.eventId} == ${selectedEvent.eventId}">
+                <th th:text="${attendee.attendanceId}"></th>
+                <td th:text="${attendee.student.name}"></td>
+                <td th:text="${#temporals.format(attendee.tIn, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendee.tOut, 'h:mm a')}"></td>
+            </tr>
+            <tr th:each="attendee : ${attendanceGet}" th:if="${selectedEvent.wholeDay} and ${attendee.event.eventId} == ${selectedEvent.eventId}">
+                <th th:text="${attendee.attendanceId}"></th>
+                <td th:text="${attendee.student.name}"></td>
+                <td th:text="${#temporals.format(attendee.tInAm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendee.tOutAm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendee.tInPm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendee.tOutPm, 'h:mm a')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>

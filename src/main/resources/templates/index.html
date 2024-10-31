@@ -1,0 +1,251 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" crossorigin="anonymous">
+    <title>ICpEP Student Attendance System</title>
+    <style>
+        .crud-management-buttons-container {
+            margin-bottom: 20px;
+        }
+        .select-event-container {
+            margin-bottom: 20px;
+        }
+        .radio-buttons-container {
+            margin-bottom: 20px;
+        }
+        .table-attendance {
+            margin-top: 20px;
+        }
+        .form-control {
+            margin-bottom: 10px;
+        }
+        .form-check-label {
+            margin-left: 10px;
+        }
+        .select-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px; /* Add spacing between selects */
+        }
+        .select-container .form-group {
+            flex: 1 1 200px; /* Adjust width as needed */
+        }
+        .filter-button {
+            align-self: flex-end; /* Align the button at the bottom */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 class="text-center my-4">ICpEP Student Attendance System</h1>
+
+    <div class="crud-management-buttons-container text-center">
+        <a class="btn btn-primary mx-2" href="/students">Students</a>
+        <a class="btn btn-primary mx-2" href="/events">Events</a>
+        <a class="btn btn-primary mx-2" href="/attendance">Start Attendance</a>
+    </div>
+
+    <div class="select-event-container">
+        <form action="/selectedEvent" method="post">
+            <div class="form-group">
+                <label for="eventSelect">Current Event:</label>
+                <select id="eventSelect" class="form-control" name="event" onchange="this.form.submit()">
+                    <option value="" disabled selected>Select an event</option>
+                    <option th:each="event : ${events}" th:value="${event.eventId}" th:text="${event.name}" th:selected="${event.eventSelected}"></option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div class="radio-buttons-container">
+        <form id="radioForm" action="/updateClockState" method="post">
+            <div th:if="${selectedEvent != null}">
+                <div th:if="${selectedEvent.wholeDay}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="clockState" id="clockInAM" value="CLOCK_IN_AM"
+                               th:checked="${selectedEvent.clockState == 'CLOCK_IN_AM'}" onclick="submitForm()">
+                        <label class="form-check-label" for="clockInAM">Clock In AM</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="clockState" id="clockOutAM" value="CLOCK_OUT_AM"
+                               th:checked="${selectedEvent.clockState == 'CLOCK_OUT_AM'}" onclick="submitForm()">
+                        <label class="form-check-label" for="clockOutAM">Clock Out AM</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="clockState" id="clockInPM" value="CLOCK_IN_PM"
+                               th:checked="${selectedEvent.clockState == 'CLOCK_IN_PM'}" onclick="submitForm()">
+                        <label class="form-check-label" for="clockInPM">Clock In PM</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="clockState" id="clockOutPM" value="CLOCK_OUT_PM"
+                               th:checked="${selectedEvent.clockState == 'CLOCK_OUT_PM'}" onclick="submitForm()">
+                        <label class="form-check-label" for="clockOutPM">Clock Out PM</label>
+                    </div>
+                </div>
+                <div th:if="${!selectedEvent.wholeDay}">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="clockState" id="clockIn" value="CLOCK_IN"
+                               th:checked="${selectedEvent.clockState == 'CLOCK_IN'}" onclick="submitForm()">
+                        <label class="form-check-label" for="clockIn">Clock In</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="clockState" id="clockOut" value="CLOCK_OUT"
+                               th:checked="${selectedEvent.clockState == 'CLOCK_OUT'}" onclick="submitForm()">
+                        <label class="form-check-label" for="clockOut">Clock Out</label>
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" name="eventId" th:value="${selectedEvent != null ? selectedEvent.eventId : ''}">
+        </form>
+    </div>
+
+    <form method="get" th:action="@{/}">
+        <div class="select-container">
+            <div class="form-group">
+                <select id="yearLevelSelect" class="form-control" th:name="yearLevel" th:value="${yearLevel}">
+                    <option value="">Select Year Level</option>
+                    <option th:each="level : ${uniqueValues.yearLevels}"
+                            th:value="${level}"
+                            th:text="${level}"
+                            th:selected="${level == selectedYearLevel}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <select id="sectionSelect" class="form-control" th:name="section" th:value="${section}">
+                    <option value="">Select Section</option>
+                    <option th:each="section : ${uniqueValues.sections}"
+                            th:value="${section}"
+                            th:text="${section}"
+                            th:selected="${section == selectedSection}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <select id="courseSelect" class="form-control" th:name="course" th:value="${course}">
+                    <option value="">Select Course</option>
+                    <option value="CpE">Computer Engineering</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <select id="eventNameSelect" class="form-control" th:name="eventName" th:value="${eventName}">
+                    <option value="">Select Event</option>
+                    <option th:each="event : ${events}"
+                            th:value="${event.name}"
+                            th:text="${event.name}"
+                            th:selected="${event.name == eventName}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="form-group d-flex">
+                <button type="submit" class="btn btn-primary mr-2">Filter</button>
+                <button type="submit" formaction="/savePage" class="btn btn-primary">PDF</button>
+            </div>
+
+        </div>
+    </form>
+    <div class="table-attendance" th:if="${filteredEventIsWholeDay != null}">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+            <tr th:if="${!filteredEventIsWholeDay}">
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Year Level</th>
+                <th scope="col">Section</th>
+                <th scope="col">Course</th>
+                <th scope="col">Event</th>
+                <th scope="col">Time In</th>
+                <th scope="col">Time Out</th>
+            </tr>
+            <tr th:if="${filteredEventIsWholeDay}">
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Year Level</th>
+                <th scope="col">Section</th>
+                <th scope="col">Course</th>
+                <th scope="col">Event</th>
+                <th scope="col">Time In AM</th>
+                <th scope="col">Time Out AM</th>
+                <th scope="col">Time In PM</th>
+                <th scope="col">Time Out PM</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="attendance : ${attendances}" th:if="${!filteredEventIsWholeDay}" >
+                <th th:text="${attendance.attendanceId}"></th>
+                <td th:text="${attendance.student.name}"></td>
+                <td th:text="${attendance.student.yearLevel}"></td>
+                <td th:text="${attendance.student.section}"></td>
+                <td th:text="${attendance.student.course}"></td>
+                <td th:text="${attendance.event.name}"></td>
+                <td th:text="${#temporals.format(attendance.tIn, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tOut, 'h:mm a')}"></td>
+            </tr>
+            <tr th:each="attendance : ${attendances}" th:if="${filteredEventIsWholeDay}" >
+                <th th:text="${attendance.attendanceId}"></th>
+                <td th:text="${attendance.student.name}"></td>
+                <td th:text="${attendance.student.yearLevel}"></td>
+                <td th:text="${attendance.student.section}"></td>
+                <td th:text="${attendance.student.course}"></td>
+                <td th:text="${attendance.event.name}"></td>
+                <td th:text="${#temporals.format(attendance.tInAm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tOutAm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tInPm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tOutPm, 'h:mm a')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="table-attendance" th:if="${filteredEventIsWholeDay == null}">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Year Level</th>
+                <th scope="col">Section</th>
+                <th scope="col">Course</th>
+                <th scope="col">Event</th>
+                <th scope="col">Time In</th>
+                <th scope="col">Time Out</th>
+                <th scope="col">Time In AM</th>
+                <th scope="col">Time Out AM</th>
+                <th scope="col">Time In PM</th>
+                <th scope="col">Time Out PM</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="attendance : ${attendances}">
+                <th th:text="${attendance.attendanceId}"></th>
+                <td th:text="${attendance.student.name}"></td>
+                <td th:text="${attendance.student.yearLevel}"></td>
+                <td th:text="${attendance.student.section}"></td>
+                <td th:text="${attendance.student.course}"></td>
+                <td th:text="${attendance.event.name}"></td>
+                <td th:text="${#temporals.format(attendance.tIn, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tOut, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tInAm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tOutAm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tInPm, 'h:mm a')}"></td>
+                <td th:text="${#temporals.format(attendance.tOutPm, 'h:mm a')}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function submitForm() {
+        document.getElementById("radioForm").submit();
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>

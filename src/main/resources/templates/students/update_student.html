@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Student Info</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" crossorigin="anonymous">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-control {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Update New Student</a>
+    <div class="ml-auto">
+        <a class="btn btn-primary" href="/students">Cancel</a>
+    </div>
+</nav>
+<div class="container form-container">
+    <h2 class="text-center mb-4">Update Student Info</h2>
+    <form th:action="@{/students/updateStudent}" th:object="${student}" method="post">
+        <div class="form-group">
+            <input type="hidden" th:field="*{studentId}"/>
+            <label for="name">Name:</label>
+            <input type="text" class="form-control" id="name" th:field="*{name}" />
+        </div>
+        <div class="form-group">
+            <label for="yearLevel">Year Level:</label>
+            <input type="text" class="form-control" id="yearLevel" th:field="*{yearLevel}" />
+        </div>
+        <div class="form-group">
+            <label for="section">Section:</label>
+            <input type="text" class="form-control" id="section" th:field="*{section}" />
+        </div>
+        <div class="form-group">
+            <label for="course">Course:</label>
+            <select class="form-control" id="course" th:field="*{course}">
+                <option value="CpE">Computer Engineering</option>
+                <!-- Add more options if needed -->
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" crossorigin="anonymous"></script>
+</body>
+</html>
